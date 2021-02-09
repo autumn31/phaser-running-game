@@ -247,11 +247,10 @@ export default class mainScene extends Phaser.Scene {
     }
     this.sky.tilePositionX += 2;
 
-    this.player.anims.play("car", true);
-    // game over
-    if (this.player.y > config.height) {
-      this.scene.start("mainScene");
+    if (!this.player.body.touching.down) {
+      this.player.onGround = false;
     }
+    this.player.anims.play("car", true);
     this.player.x = gameOptions.playerStartPosition;
 
     // recycling platforms
