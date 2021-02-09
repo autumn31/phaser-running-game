@@ -11,6 +11,12 @@ export default class carrot extends Phaser.Physics.Arcade.Sprite {
     this.setVisible(true);
   }
 
+  update(time, delta) {
+    if (this.x < -100) {
+      this.remove();
+    }
+  }
+
   remove() {
     this.setActive(false);
     this.setVisible(false);

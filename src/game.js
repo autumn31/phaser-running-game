@@ -14,6 +14,10 @@ export default class mainScene extends Phaser.Scene {
     this.load.image("carrot", "assets/carrot.png");
     this.load.image("trap", "assets/needle.png");
     this.load.image("sky", "assets/sky.png");
+    this.load.audio("pui", "assets/pui.mp3");
+    this.load.audio("pui_cry", "assets/pui_cry.mp3");
+    this.load.audio("ping", "assets/p-ping.mp3");
+    this.load.audio("bgm", "assets/bgm.mp3");
     this.load.spritesheet("car", "assets/car5.png", {
       frameWidth: 100,
       frameHeight: 68,
@@ -21,8 +25,70 @@ export default class mainScene extends Phaser.Scene {
   }
 
   create() {
+    if (!this.player) {
+      this.bgm = this.sound.add("bgm", { loop: true, volume: 0.5 });
+      this.bgmOn = true;
+      this.soundOn = true;
+    }
+    if (this.bgmOn) {
+      this.bgm.play();
+    }
     this.gameOver = false;
     this.sky = this.add.tileSprite(350, 150, 700, 300, "sky");
+
+    this.bgmText = this.add.text(600, 20, `Bgm: ${this.bgmOn ? "on" : "off"}`, {
+      font: "16px Arial",
+      fill: "#fff",
+    });
+    this.bgmText.setInteractive(
+      new Phaser.Geom.Rectangle(0, 0, this.bgmText.width, this.bgmText.height),
+      Phaser.Geom.Rectangle.Contains
+    );
+
+    this.bgmText.on(
+      "pointerdown",
+      function () {
+        if (this.bgmOn) {
+          this.bgmOn = false;
+          this.bgm.stop();
+        } else {
+          this.bgmOn = true;
+          this.bgm.play();
+        }
+        this.bgmText.setText(`Bgm: ${this.bgmOn ? "on" : "off"}`);
+      }.bind(this)
+    );
+
+    this.soundText = this.add.text(
+      600,
+      45,
+      `Sound: ${this.soundOn ? "on" : "off"}`,
+      {
+        font: "16px Arial",
+        fill: "#fff",
+      }
+    );
+    this.soundText.setInteractive(
+      new Phaser.Geom.Rectangle(
+        0,
+        0,
+        this.soundText.width,
+        this.soundText.height
+      ),
+      Phaser.Geom.Rectangle.Contains
+    );
+
+    this.soundText.on(
+      "pointerdown",
+      function () {
+        if (this.soundOn) {
+          this.soundOn = false;
+        } else {
+          this.soundOn = true;
+        }
+        this.soundText.setText(`Sound: ${this.soundOn ? "on" : "off"}`);
+      }.bind(this)
+    );
 
     this.score = 0;
     this.scoreText = this.add.text(20, 20, "score: " + this.score, {
@@ -71,7 +137,17 @@ export default class mainScene extends Phaser.Scene {
     this.physics.add.collider(this.player, ground);
 
     // checking for input
-    this.input.keyboard.on("keydown-SPACE", this.startJump, this);
+    this.input.keyboard.on(
+      "keydown-SPACE",
+      () => {
+        if (this.gameOver) {
+          this.restart();
+        } else {
+          this.startJump();
+        }
+      },
+      this
+    );
     this.input.keyboard.on("keyup-SPACE", this.endJump, this);
 
     this.carrots = this.physics.add.group({
@@ -85,6 +161,9 @@ export default class mainScene extends Phaser.Scene {
       (p, c) => {
         if (c.visible) {
           c.remove();
+          if (this.soundOn) {
+            this.sound.play("ping", { volume: 0.3 });
+          }
           this.score += 10;
           this.scoreText.setText("score: " + this.score);
         }
@@ -125,9 +204,14 @@ export default class mainScene extends Phaser.Scene {
 
   // the player jumps when on the ground, or once in the air as long as there are jumps left and the first jump was on the ground
   startJump() {
-    if (this.player.body.touching.down) {
-      this.player.setVelocityY(gameOptions.jumpForce * -1);
-      this.player.setGravityY(gameOptions.playerGravity / 2);
+    if (!this.gameOver) {
+      if (this.player.body.touching.down) {
+        this.player.setVelocityY(gameOptions.jumpForce * -1);
+        this.player.setGravityY(gameOptions.playerGravity / 2);
+        if (this.soundOn) {
+          this.sound.play("pui");
+        }
+      }
     }
   }
   endJump() {
@@ -194,13 +278,14 @@ export default class mainScene extends Phaser.Scene {
     }
   }
   caught(player) {
-    // if (this.soundOn) {
-    //   this.sound.play("death");
-    // }
-    // this.bgm.stop();
+    if (this.soundOn) {
+      this.sound.play("pui_cry");
+    }
+    this.bgm.stop();
     this.physics.pause();
 
     player.setTint(0xff0000);
+    this.player.anims.stop();
     this.gameOver = true;
 
     var ggText = this.add.text(
