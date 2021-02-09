@@ -171,7 +171,17 @@ export default class mainScene extends Phaser.Scene {
       },
       this
     );
+    this.input.on(
+      "pointerdown",
+      () => {
+        if (!this.gameOver) {
+          this.startJump();
+        }
+      },
+      this
+    );
     this.input.keyboard.on("keyup-SPACE", this.endJump, this);
+    this.input.on("pointerup", this.endJump, this);
 
     this.carrots = this.physics.add.group({
       classType: carrot,

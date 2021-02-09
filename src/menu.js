@@ -30,14 +30,22 @@ class menuScene extends Phaser.Scene {
 }
 
 export var config = {
-  width: 700,
-  height: 300,
+  type: Phaser.AUTO,
   backgroundColor: "#3498db",
   scene: [menuScene, mainScene],
   audio: {
     disableWebAudio: true,
   },
+  scale: {
+    mode: Phaser.Scale.WIDTH_CONTROLS_HEIGHT,
+    parent: "game",
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: 700,
+    height: 300,
+  },
   physics: { default: "arcade" },
+  width: 700,
+  height: 300,
   parent: "game",
 };
 new Phaser.Game(config);
