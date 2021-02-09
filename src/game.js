@@ -226,7 +226,7 @@ export default class mainScene extends Phaser.Scene {
     if (!this.gameOver) {
       if (this.player.body.touching.down) {
         this.player.setVelocityY(gameOptions.jumpForce * -1);
-        this.player.setGravityY(gameOptions.playerGravity / 2);
+        this.player.setGravityY(gameOptions.playerGravity / 3);
         if (this.soundOn) {
           this.sound.play("pui");
         }
@@ -357,7 +357,7 @@ let gameOptions = {
   platformStartSpeed: 300,
   spawnRange: [100, 350],
   platformSizeRange: [50, 250],
-  playerGravity: 1000,
+  playerGravity: 1500,
   jumpForce: 400,
   playerStartPosition: 200,
   jumps: 2,
