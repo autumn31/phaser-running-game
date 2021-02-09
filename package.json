@@ -12,6 +12,7 @@
   "author": "autumn31",
   "license": "ISC",
   "dependencies": {
+    "firebase": "^8.2.6",
     "phaser": "^3.52.0"
   },
   "devDependencies": {

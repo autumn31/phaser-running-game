@@ -2,6 +2,7 @@ import "phaser";
 import { config } from "./menu";
 import carrot from "./carrot";
 import trap from "./trap";
+import { uploadscore } from "./leaderboard.js";
 
 export default class mainScene extends Phaser.Scene {
   constructor() {
@@ -287,6 +288,7 @@ export default class mainScene extends Phaser.Scene {
     player.setTint(0xff0000);
     this.player.anims.stop();
     this.gameOver = true;
+    uploadscore(this.score);
 
     var ggText = this.add.text(
       250,
