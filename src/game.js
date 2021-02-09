@@ -151,9 +151,13 @@ export default class mainScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.crows, this.caught, null, this);
 
     // setting collisions between the player and the platform group
-    this.physics.add.collider(this.player, this.platformGroup);
+    this.physics.add.collider(this.player, this.platformGroup, (p) => {
+      if (p.body.touching.down) {
+        p.onGround = true;
+      }
+    });
 
-    this.physics.add.collider(this.player, ground);
+    this.physics.add.collider(this.player, ground, (p) => (p.onGround = true));
 
     // checking for input
     this.input.keyboard.on(
@@ -181,7 +185,7 @@ export default class mainScene extends Phaser.Scene {
         if (c.visible) {
           c.remove();
           if (this.soundOn) {
-            this.sound.play("ping", { volume: 0.3 });
+            this.sound.play("ping", { volume: 0.2 });
           }
           this.score += 10;
           this.scoreText.setText("score: " + this.score);
@@ -224,7 +228,8 @@ export default class mainScene extends Phaser.Scene {
   // the player jumps when on the ground, or once in the air as long as there are jumps left and the first jump was on the ground
   startJump() {
     if (!this.gameOver) {
-      if (this.player.body.touching.down) {
+      if (this.player.onGround) {
+        this.player.onGround = false;
         this.player.setVelocityY(gameOptions.jumpForce * -1);
         this.player.setGravityY(gameOptions.playerGravity / 3);
         if (this.soundOn) {
@@ -301,6 +306,7 @@ export default class mainScene extends Phaser.Scene {
         var dy = Math.floor(Math.random() * 3);
         crow.show(config.width, 50 + 50 * dy);
         crow.setVelocityX(gameOptions.platformStartSpeed * -1.2);
+        crow.body.setSize(30, 20);
       }
     }
   }
