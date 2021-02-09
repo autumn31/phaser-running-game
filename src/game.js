@@ -69,7 +69,8 @@ export default class mainScene extends Phaser.Scene {
 
     this.physics.add.collider(this.player, ground);
     // checking for input
-    this.input.keyboard.on("keydown-SPACE", this.jump, this);
+    this.input.keyboard.on("keydown-SPACE", this.startJump, this);
+    this.input.keyboard.on("keyup-SPACE", this.endJump, this);
 
     this.carrots = this.physics.add.group({
       classType: carrot,
@@ -120,17 +121,14 @@ export default class mainScene extends Phaser.Scene {
   }
 
   // the player jumps when on the ground, or once in the air as long as there are jumps left and the first jump was on the ground
-  jump() {
-    if (
-      this.player.body.touching.down ||
-      (this.playerJumps > 0 && this.playerJumps < gameOptions.jumps)
-    ) {
-      if (this.player.body.touching.down) {
-        this.playerJumps = 0;
-      }
+  startJump() {
+    if (this.player.body.touching.down) {
       this.player.setVelocityY(gameOptions.jumpForce * -1);
-      this.playerJumps++;
+      this.player.setGravityY(gameOptions.playerGravity / 2);
     }
+  }
+  endJump() {
+    this.player.setGravityY(gameOptions.playerGravity);
   }
   update() {
     this.sky.tilePositionX += 2;
@@ -195,7 +193,7 @@ let gameOptions = {
   platformStartSpeed: 300,
   spawnRange: [100, 350],
   platformSizeRange: [50, 250],
-  playerGravity: 900,
+  playerGravity: 1000,
   jumpForce: 400,
   playerStartPosition: 200,
   jumps: 2,
