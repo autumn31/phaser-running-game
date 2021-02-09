@@ -28,7 +28,7 @@ function createListItem(name, score) {
 
 export function uploadscore(score) {
   var name = document.getElementById("fname").value;
-
+  name = name ? name.trim() : "";
   if (name !== "") {
     database
       .ref(`${lb_name}/${name}`)
