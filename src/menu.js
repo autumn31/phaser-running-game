@@ -36,13 +36,6 @@ export var config = {
   audio: {
     disableWebAudio: true,
   },
-  scale: {
-    mode: Phaser.Scale.WIDTH_CONTROLS_HEIGHT,
-    parent: "game",
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: 700,
-    height: 300,
-  },
   physics: { default: "arcade" },
   width: 700,
   height: 300,
