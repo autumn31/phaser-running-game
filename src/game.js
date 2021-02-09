@@ -1,6 +1,7 @@
 import "phaser";
 import { config } from "./menu";
 import carrot from "./carrot";
+import crow from "./crow";
 import trap from "./trap";
 import { uploadscore } from "./leaderboard.js";
 
@@ -9,7 +10,6 @@ export default class mainScene extends Phaser.Scene {
     super({ key: "mainScene" });
   }
   preload() {
-    this.load.image("player", "assets/player.png");
     this.load.image("platform", "assets/wood.png");
     this.load.image("ground", "assets/ground.png");
     this.load.image("carrot", "assets/carrot.png");
@@ -22,6 +22,10 @@ export default class mainScene extends Phaser.Scene {
     this.load.spritesheet("car", "assets/car5.png", {
       frameWidth: 100,
       frameHeight: 68,
+    });
+    this.load.spritesheet("crow", "assets/crow.png", {
+      frameWidth: 32,
+      frameHeight: 41,
     });
   }
 
@@ -131,6 +135,20 @@ export default class mainScene extends Phaser.Scene {
       frameRate: 5,
       repeat: -1,
     });
+
+    // adding the crow;
+    this.crows = this.physics.add.group({
+      classType: crow,
+      maxSize: 2,
+      runChildUpdate: true,
+    });
+    this.anims.create({
+      key: "crow",
+      frames: this.anims.generateFrameNumbers("crow"),
+      frameRate: 7,
+      repeat: -1,
+    });
+    this.physics.add.overlap(this.player, this.crows, this.caught, null, this);
 
     // setting collisions between the player and the platform group
     this.physics.add.collider(this.player, this.platformGroup);
@@ -277,6 +295,14 @@ export default class mainScene extends Phaser.Scene {
         trap.setVelocityX(gameOptions.platformStartSpeed * -1);
       }
     }
+    if (Math.random() > 0.993) {
+      var crow = this.crows.get();
+      if (crow) {
+        var dy = Math.floor(Math.random() * 3);
+        crow.show(config.width, 50 + 50 * dy);
+        crow.setVelocityX(gameOptions.platformStartSpeed * -1.2);
+      }
+    }
   }
   caught(player) {
     if (this.soundOn) {
@@ -287,6 +313,9 @@ export default class mainScene extends Phaser.Scene {
 
     player.setTint(0xff0000);
     this.player.anims.stop();
+    this.crows.getChildren().forEach((crow) => {
+      crow.anims.stop();
+    });
     this.gameOver = true;
     uploadscore(this.score);
 
