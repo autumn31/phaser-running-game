@@ -21,6 +21,7 @@ export default class mainScene extends Phaser.Scene {
   }
 
   create() {
+    this.gameOver = false;
     this.sky = this.add.tileSprite(350, 150, 700, 300, "sky");
 
     this.score = 0;
@@ -68,6 +69,7 @@ export default class mainScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.platformGroup);
 
     this.physics.add.collider(this.player, ground);
+
     // checking for input
     this.input.keyboard.on("keydown-SPACE", this.startJump, this);
     this.input.keyboard.on("keyup-SPACE", this.endJump, this);
@@ -96,6 +98,7 @@ export default class mainScene extends Phaser.Scene {
       maxSize: 20,
       runChildUpdate: true,
     });
+    this.physics.add.overlap(this.player, this.traps, this.caught, null, this);
   }
 
   addPlatform(platformWidth, posX) {
@@ -131,6 +134,9 @@ export default class mainScene extends Phaser.Scene {
     this.player.setGravityY(gameOptions.playerGravity);
   }
   update() {
+    if (this.gameOver) {
+      return;
+    }
     this.sky.tilePositionX += 2;
 
     this.player.anims.play("car", true);
@@ -175,17 +181,59 @@ export default class mainScene extends Phaser.Scene {
       if (carrot) {
         var dy = Math.floor(Math.random() * 3);
         carrot.show(config.width + shift, 250 - 80 * dy);
-        carrot.speed = Phaser.Math.GetSpeed(gameOptions.platformStartSpeed, 1);
+        carrot.setVelocityX(gameOptions.platformStartSpeed * -1);
       }
     }
 
     if (Math.random() > 0.99) {
       var trap = this.traps.get();
       if (trap) {
-        trap.show(config.width, 245);
-        trap.speed = Phaser.Math.GetSpeed(gameOptions.platformStartSpeed, 1);
+        trap.show(config.width, 258);
+        trap.setVelocityX(gameOptions.platformStartSpeed * -1);
       }
     }
+  }
+  caught(player) {
+    // if (this.soundOn) {
+    //   this.sound.play("death");
+    // }
+    // this.bgm.stop();
+    this.physics.pause();
+
+    player.setTint(0xff0000);
+    this.gameOver = true;
+
+    var ggText = this.add.text(
+      250,
+      120,
+      "game over\n(Click or Space to restart)",
+      {
+        font: "20px Arial",
+        fill: "#fff",
+        align: "center",
+      }
+    );
+    ggText.setInteractive(
+      new Phaser.Geom.Rectangle(0, 0, ggText.width, ggText.height),
+      Phaser.Geom.Rectangle.Contains
+    );
+
+    ggText.on(
+      "pointerdown",
+      function () {
+        this.restart();
+      }.bind(this)
+    );
+    // this.scene.pause();
+  }
+
+  restart() {
+    this.registry.destroy(); // destroy registry
+    this.events.off(); // disable all active events
+    this.gameOver = false;
+    this.physics.resume();
+    this.scene.restart(); // restart current scene
+    this.player.disableBody(true, true);
   }
 }
 
